@@ -30,11 +30,9 @@ before_deploy:
   - ssh-add .travis/github_tags_push_deploy_key
   - docker login --username=${DOCKERHUB_LOGIN} --password=${DOCKERHUB_PASSWORD}
 
-# Publish snapshots to Dockerhub for commits tagged `latest-snapshot-*`
-deploy:
-  on:
-    all_branches: true
-    condition: $( git tag --points-at HEAD | grep '^latest-snapshot' ) != ''
-  skip_cleanup: true
-  provider: script
-  script: make snapshot
+# Update 'latest' on dockerhub with each commit
+after_success:
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+      docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+      make latest;
+    fi

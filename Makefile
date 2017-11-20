@@ -128,6 +128,11 @@ snapshot: require-clean-repo require-snapshot-version push-snapshot
 push-snapshot: $(SNAPSHOT_TAGS)
 	$(SHELL) $(PUSH_SH) $(call docker-tag,$^)
 
+latest: require-clean-repo require-snapshot-version push-latest
+
+push-latest: $(LATEST_TAGS)
+	$(SHELL) $(PUSH_SH) $(call docker-tag,$^)
+
 #
 # Create tags without pushing. This is probably only useful for testing.
 #
