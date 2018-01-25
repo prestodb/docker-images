@@ -36,7 +36,15 @@ RUN yum install -y \
 
 # Cleanup
   && yum -y clean all && rm -rf /tmp/* /var/tmp/* \
-  && ln -s /usr/share/java/mysql-connector-java.jar /usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar
+  && ln -s /usr/share/java/mysql-connector-java.jar /usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar \
+
+# Remove extra not needed packages
+  && rpm -e --nodeps $(rpm -qa | grep '^pig') \
+  && rpm -e --nodeps $(rpm -qa | grep '^tez') \
+  && rpm -e --nodeps $(rpm -qa | grep '^zookeeper') \
+  && rpm -e --nodeps $(rpm -qa | grep '^ranger') \
+  && rpm -e --nodeps $(rpm -qa | grep '^atlas') \
+  && rpm -e --nodeps $(rpm -qa | grep '^spark')
 
 # Delete original configuration
 RUN rm -r /etc/hadoop/conf/* \
