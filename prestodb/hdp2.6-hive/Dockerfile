@@ -19,24 +19,23 @@ RUN ln -snf "/usr/share/zoneinfo/Asia/Kathmandu" /etc/localtime && echo "Asia/Ka
 # Install HDP repo
 RUN wget -nv http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.3.0/hdp.repo -P /etc/yum.repos.d
 
+ADD yum-install-clean.sh .
+
 # Install Hadoop, Hive (w/ MySQL)
-RUN yum install -y \
-    hadoop-hdfs-namenode \
-    hadoop-hdfs-secondarynamenode \
-    hadoop-hdfs-datanode \
+RUN ./yum-install-clean.sh hadoop-hdfs-namenode
+RUN ./yum-install-clean.sh hadoop-hdfs-secondarynamenode
+RUN ./yum-install-clean.sh hadoop-hdfs-datanode
 
-    hadoop-yarn-resourcemanager \
-    hadoop-yarn-nodemanager \
+RUN ./yum-install-clean.sh hadoop-yarn-resourcemanager
+RUN ./yum-install-clean.sh hadoop-yarn-nodemanager
 
-    hive \
-    hive-metastore \
-    hive-server2 \
+RUN ./yum-install-clean.sh hive
+RUN ./yum-install-clean.sh hive-metastore
+RUN ./yum-install-clean.sh hive-server2
 
-    mysql-server mysql-connector-java \
+RUN ./yum-install-clean.sh mysql-server mysql-connector-java
 
-# Cleanup
-  && yum -y clean all && rm -rf /tmp/* /var/tmp/* \
-  && ln -s /usr/share/java/mysql-connector-java.jar /usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar
+RUN ln -s /usr/share/java/mysql-connector-java.jar /usr/hdp/current/hive-metastore/lib/mysql-connector-java.jar
 
 # Delete original configuration
 RUN rm -r /etc/hadoop/conf/* \
