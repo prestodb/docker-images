@@ -14,7 +14,7 @@ FROM prestodb/centos6-oj8:unlabelled
 MAINTAINER Presto community <https://prestodb.io/community.html>
 
 # Change default timezone
-RUN ln -snf "/usr/share/zoneinfo/Asia/Kathmandu" /etc/localtime && echo "Asia/Kathmandu" > /etc/timezone
+RUN ln -snf "/usr/share/zoneinfo/America/Bahia_Banderas" /etc/localtime && echo "America/Bahia_Banderas" > /etc/timezone
 
 # Install HDP repo
 RUN wget -nv http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.3.0/hdp.repo -P /etc/yum.repos.d

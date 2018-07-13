@@ -14,7 +14,7 @@ FROM prestodb/centos6-oj8:unlabelled
 MAINTAINER Presto community <https://prestodb.io/community.html>
 
 # Change default timezone
-RUN ln -snf "/usr/share/zoneinfo/Asia/Kathmandu" /etc/localtime && echo "Asia/Kathmandu" > /etc/timezone
+RUN ln -snf "/usr/share/zoneinfo/America/Bahia_Banderas" /etc/localtime && echo "America/Bahia_Banderas" > /etc/timezone
 
 # Setup CDH repo, pin the CDH distribution to a concrete version
 RUN wget -nv https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/cloudera-cdh5.repo -P /etc/yum.repos.d \
