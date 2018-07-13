@@ -14,7 +14,7 @@ FROM prestodb/cdh5-base:unlabelled
 MAINTAINER Presto community <https://prestodb.io/community.html>
 
 # CHANGE DEFAULT TIMEZONE
-RUN ln -snf "/usr/share/zoneinfo/Asia/Kathmandu" /etc/localtime && echo "Asia/Kathmandu" > /etc/timezone
+RUN ln -snf "/usr/share/zoneinfo/America/Bahia_Banderas" /etc/localtime && echo "America/Bahia_Banderas" > /etc/timezone
  
 # INSTALL HADOOP AND HIVE
 RUN \
