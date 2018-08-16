@@ -1,0 +1,52 @@
+--- ../../cdh5.13-hive/files/etc/hive/conf/hive-site.xml	2018-01-25 23:10:25.000000000 +0100
++++ etc/hive/conf/hive-site.xml	2018-08-16 16:11:56.000000000 +0200
+@@ -66,2 +66,49 @@
+ 
++    <!-- Enable authentication -->
++    <property>
++        <name>hive.server2.authentication</name>
++        <value>KERBEROS</value>
++    </property>
++
++    <property>
++        <name>hive.server2.enable.impersonation</name>
++        <value>true</value>
++    </property>
++
++    <property>
++        <name>hive.server2.authentication.kerberos.principal</name>
++        <value>hive/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <property>
++        <name>hive.server2.authentication.kerberos.keytab</name>
++        <value>/etc/hive/conf/hive.keytab</value>
++    </property>
++
++    <property>
++        <name>hive.metastore.sasl.enabled</name>
++        <value>true</value>
++    </property>
++
++    <property>
++        <name>hive.metastore.kerberos.keytab.file</name>
++        <value>/etc/hive/conf/hive.keytab</value>
++    </property>
++
++    <property>
++        <name>hive.metastore.kerberos.principal</name>
++        <value>hive/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <!-- Enable SQL based authorization -->
++    <property>
++        <name>hive.security.authorization.manager</name>
++        <value>org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdConfOnlyAuthorizerFactory</value>
++    </property>
++
++    <property>
++        <name>hive.security.authorization.task.factory</name>
++        <value>org.apache.hadoop.hive.ql.parse.authorization.HiveAuthorizationTaskFactoryImpl</value>
++    </property>
++
+ </configuration>
