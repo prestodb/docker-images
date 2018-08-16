@@ -16,6 +16,8 @@ MAINTAINER Presto community <https://prestodb.io/community.html>
 ARG JDK_URL
 ARG JDK_PATH
 
+COPY ./files /
+
 # Install Oracle Java and presto-admin dependences (already has python 2.6)
 RUN \
     set -xeu && \
