@@ -1,0 +1,76 @@
+--- ../../hdp2.6-hive/files/etc/hadoop/conf/hdfs-site.xml	2018-01-25 23:10:25.000000000 +0100
++++ etc/hadoop/conf/hdfs-site.xml	2018-01-25 23:10:25.000000000 +0100
+@@ -27,2 +27,73 @@
+ 
++    <!-- General HDFS security config -->
++    <property>
++        <name>dfs.block.access.token.enable</name>
++        <value>true</value>
++    </property>
++
++    <!-- NameNode security config -->
++    <property>
++        <name>dfs.namenode.keytab.file</name>
++        <value>/etc/hadoop/conf/hdfs.keytab</value> <!-- path to the HDFS keytab -->
++    </property>
++    <property>
++        <name>dfs.namenode.kerberos.principal</name>
++        <value>hdfs/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++    <property>
++        <name>dfs.namenode.kerberos.internal.spnego.principal</name>
++        <value>HTTP/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <!-- Secondary NameNode security config -->
++    <property>
++        <name>dfs.secondary.namenode.keytab.file</name>
++        <value>/etc/hadoop/conf/hdfs.keytab</value> <!-- path to the HDFS keytab -->
++    </property>
++    <property>
++        <name>dfs.secondary.namenode.kerberos.principal</name>
++        <value>hdfs/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++    <property>
++        <name>dfs.secondary.namenode.kerberos.internal.spnego.principal</name>
++        <value>HTTP/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <!-- DataNode security config -->
++    <property>
++        <name>dfs.datanode.keytab.file</name>
++        <value>/etc/hadoop/conf/hdfs.keytab</value> <!-- path to the HDFS keytab -->
++    </property>
++    <property>
++        <name>dfs.datanode.kerberos.principal</name>
++        <value>hdfs/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <!-- WebHDFS security config -->
++    <property>
++        <name>dfs.webhdfs.enabled</name>
++        <value>true</value>
++    </property>
++
++    <!-- Web Authentication config -->
++    <property>
++        <name>dfs.web.authentication.kerberos.principal</name>
++        <value>HTTP/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <property>
++        <name>dfs.web.authentication.kerberos.keytab</name>
++        <value>/etc/hadoop/conf/HTTP.keytab</value> <!-- path to the HTTP keytab -->
++    </property>
++
++    <property>
++        <name>ignore.secure.ports.for.testing</name>
++        <value>true</value>
++    </property>
++
++    <property>
++        <name>dfs.http.policy</name>
++        <value>HTTP_ONLY</value>
++    </property>
++
+ </configuration>
