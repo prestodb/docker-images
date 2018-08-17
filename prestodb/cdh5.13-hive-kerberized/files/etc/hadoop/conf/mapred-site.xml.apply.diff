@@ -1,0 +1,48 @@
+--- ../../cdh5.13-hive/files/etc/hadoop/conf/mapred-site.xml	2018-01-25 23:10:25.000000000 +0100
++++ etc/hadoop/conf/mapred-site.xml	2018-08-16 16:11:56.000000000 +0200
+@@ -40,2 +40,45 @@
+ 
++    <!-- MapReduce Job History Server security configs -->
++    <property>
++        <name>mapreduce.jobhistory.keytab</name>
++        <value>/etc/hadoop/conf/mapred.keytab</value>    <!-- path to the MAPRED keytab for the Job History Server -->
++    </property>
++
++    <property>
++        <name>mapreduce.jobhistory.principal</name>
++        <value>mapred/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <!-- JobTracker security configs -->
++    <property>
++        <name>mapreduce.jobtracker.kerberos.principal</name>
++        <value>mapred/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <property>
++        <name>mapreduce.jobtracker.keytab.file</name>
++        <value>/etc/hadoop/conf/mapred.keytab</value> <!-- path to the MapReduce keytab -->
++    </property>
++
++    <!-- TaskTracker security configs -->
++    <property>
++        <name>mapreduce.tasktracker.kerberos.principal</name>
++        <value>mapred/hadoop-master@LABS.TERADATA.COM</value>
++    </property>
++
++    <property>
++        <name>mapreduce.tasktracker.keytab.file</name>
++        <value>/etc/hadoop/conf/mapred.keytab</value> <!-- path to the MapReduce keytab -->
++    </property>
++
++    <property>
++        <name>mapred.task.tracker.task-controller</name>
++        <value>org.apache.hadoop.mapred.LinuxTaskController</value>
++    </property>
++    
++    <property>
++        <name>mapreduce.tasktracker.group</name>
++        <value>mapred</value>
++    </property>
++
+ </configuration>

@@ -1,0 +1,27 @@
+--- ../../hdp2.6-hive/files/etc/hadoop/conf/core-site.xml	2018-01-25 23:10:25.000000000 +0100
++++ etc/hadoop/conf/core-site.xml	2018-01-25 23:10:25.000000000 +0100
+@@ -101,2 +101,24 @@
+ 
++    <!-- Presto impersonation -->
++    <property>
++        <name>hadoop.proxyuser.presto-server.groups</name>
++        <value>*</value>
++    </property>
++
++    <property>
++        <name>hadoop.proxyuser.presto-server.hosts</name>
++        <value>*</value>
++    </property>
++
++    <!-- Enable authentication -->
++    <property>
++        <name>hadoop.security.authentication</name>
++        <value>kerberos</value>
++    </property>
++
++    <property>
++        <name>hadoop.security.authorization</name>
++        <value>true</value>
++    </property>
++
+ </configuration>

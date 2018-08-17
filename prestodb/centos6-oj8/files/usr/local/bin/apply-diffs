@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Applies .apply.diff files to the base file in a directory.
+# When working with Hive configuration for a docker image, you can generate the
+# diff files with the following (requires
+# https://github.com/findepi/tooltrash/blob/master/docker-copy-from-image)
+# cd <image>/files
+# base="$(cat ../Dockerfile | sed -n 's/^FROM //p')"
+# tmp_file="$(mktemp)"
+# for f in etc/*/conf/*-site.xml; do
+#   echo "$f"
+#   docker-copy-from-image "$base" "/$f" "$tmp_file" || continue
+#   diff -bBU1 "$tmp_file" "$f" > "$f.apply.diff"
+#   git rm "$f"
+#   git add "$f.apply.diff"
+# done
+# rm "$tmp_file"
+
+set -euo pipefail
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 <dir-to-operate-in>" >&2
+    exit 1
+fi
+
+set -x
+
+find "$1" -name \*.apply.diff \
+    -exec bash -cxeu '
+        patch_file="$1"
+        base_file="${patch_file%.apply.diff}"
+        test -f "${base_file}"
+        if ! patch "${base_file}" "${patch_file}"; then
+            exit_code=$?
+            rej_file="${base_file}.rej"
+            test -f "${rej_file}" && cat "${rej_file}"
+            exit "${exit_code}"
+        fi
+        rm "${patch_file}"
+    ' - '{}' \;
