@@ -1,16 +1,20 @@
 #!/bin/bash
 
 # Applies .apply.diff files to the base file in a directory.
-# When working with Hive configuration for a docker image, you can generate the diff files with
+# When working with Hive configuration for a docker image, you can generate the
+# diff files with the following (requires
+# https://github.com/findepi/tooltrash/blob/master/docker-copy-from-image)
 # cd <image>/files
+# base="$(cat ../Dockerfile | sed -n 's/^FROM //p')"
+# tmp_file="$(mktemp)"
 # for f in etc/*/conf/*-site.xml; do
 #   echo "$f"
-#   base="../../the_base_image/files/$f"
-#   test -f "$base" || continue
-#   diff -bBU1 "$base" "$f" > "$f.apply.diff"
+#   docker-copy-from-image "$base" "/$f" "$tmp_file" || continue
+#   diff -bBU1 "$tmp_file" "$f" > "$f.apply.diff"
 #   git rm "$f"
 #   git add "$f.apply.diff"
 # done
+# rm "$tmp_file"
 
 set -euo pipefail
 
