@@ -124,8 +124,8 @@
     <property>
         <name>hadoop.security.auth_to_local</name>
         <value>
-            RULE:[2:$1/$2@$0](.*/hadoop-master@OTHERLABS.TERADATA.COM)s/.*/hadoop-master/
-	    DEFAULT
+            RULE:[2:$1@$0](.*@OTHERLABS.TERADATA.COM)s/@.*//
+            DEFAULT
         </value>
     </property>
 

@@ -55,6 +55,12 @@ RUN /usr/sbin/kadmin.local -r OTHERLABS.TERADATA.COM -d /var/kerberos/krb5kdc/pr
 RUN chown hive:hadoop /etc/hive/conf/hive-other.keytab \
   && chmod 644 /etc/hive/conf/hive-other.keytab
 
+# CREATE HDFS PRINCIPAL IN OTHER REALM
+RUN /usr/sbin/kadmin.local -r OTHERLABS.TERADATA.COM -d /var/kerberos/krb5kdc/principal-other -q "addprinc -randkey hdfs/hadoop-master@OTHERLABS.TERADATA.COM" \
+  && /usr/sbin/kadmin.local -r OTHERLABS.TERADATA.COM -d /var/kerberos/krb5kdc/principal-other -q "xst -norandkey -k /etc/hadoop/conf/hdfs-other.keytab hdfs/hadoop-master"
+RUN chown hdfs:hadoop /etc/hadoop/conf/hdfs-other.keytab \
+  && chmod 644 /etc/hadoop/conf/hdfs-other.keytab
+
 # MAKE 'LABS.TERADATA.COM' TRUST 'OTHERLABS.TERADATA.COM'
 RUN /usr/sbin/kadmin.local -q "addprinc -pw 123456 krbtgt/LABS.TERADATA.COM@OTHERLABS.TERADATA.COM"
 RUN /usr/sbin/kadmin.local -r OTHERLABS.TERADATA.COM -d /var/kerberos/krb5kdc/principal-other -q "addprinc -pw 123456 krbtgt/LABS.TERADATA.COM"
