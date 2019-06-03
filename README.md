@@ -1,5 +1,4 @@
 # Prestodb docker images
-
 ## Docker Image Names
 
 The docker images in this repository are expected to be given names of the form
@@ -256,3 +255,6 @@ Considered Harmful is that `bin/depend.sh` needs to know what images the repo kn
 how to build so it can output the second form for parent images we *don't*
 know how to build. We do this by passing in the names of all of the images we
 know how to build.
+
+## LICENSE
+This repository is licensed under the Apache License Version 2.0
