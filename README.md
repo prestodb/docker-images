@@ -256,5 +256,5 @@ how to build so it can output the second form for parent images we *don't*
 know how to build. We do this by passing in the names of all of the images we
 know how to build.
 
-## LICENSE
+## License
 This repository is licensed under the Apache License Version 2.0
