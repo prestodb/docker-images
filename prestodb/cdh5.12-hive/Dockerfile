@@ -17,7 +17,7 @@ MAINTAINER Presto community <https://prestodb.io/community.html>
 RUN ln -snf "/usr/share/zoneinfo/Asia/Kathmandu" /etc/localtime && echo "Asia/Kathmandu" > /etc/timezone
 
 # Setup CDH repo, pin the CDH distribution to a concrete version
-RUN wget -nv https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/cloudera-cdh5.repo -P /etc/yum.repos.d \
+RUN wget -v https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/cloudera-cdh5.repo -P /etc/yum.repos.d \
   && rpm --import https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/RPM-GPG-KEY-cloudera \
   && sed -i '/^baseurl=/c\baseurl=https://archive.cloudera.com/cdh5/redhat/6/x86_64/cdh/5.12.2/' /etc/yum.repos.d/cloudera-cdh5.repo
 
