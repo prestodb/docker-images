@@ -7,6 +7,7 @@ env:
   - IMAGE_TO_BUILD=prestodb/cdh5.12-hive-kerberized IMAGE_TO_TEST=cdh5.12-hive
   - IMAGE_TO_BUILD=prestodb/cdh5.15-hive-kerberized IMAGE_TO_TEST=cdh5.15-hive
   - IMAGE_TO_BUILD=prestodb/iop4.2-hive IMAGE_TO_TEST=iop4.2-hive
+  - IMAGE_TO_BUILD=prestodb/hive3.1-hive IMAGE_TO_TEST=hive3.1-hive
 
 # Prevent duplicate builds on tag pushes.
 # See https://github.com/mockito/mockito/commit/500519aac4cc13770aa47c1eb7d28e905c27e7aa

@@ -29,15 +29,28 @@ function run_in_hadoop_master_container() {
 }
 
 function check_hadoop() {
-  run_in_hadoop_master_container su hdfs -c "hive -e 'select 1;'" > /dev/null 2>&1
+  run_in_hadoop_master_container hive -e 'select 1;' > /dev/null 2>&1
 }
 
 function run_tests() {
-  run_in_hadoop_master_container su hdfs -c "hive -e 'SELECT 1'"
-  run_in_hadoop_master_container su hdfs -c "hive -e 'CREATE TABLE foo (a INT);'"
-  run_in_hadoop_master_container su hdfs -c "hive -e 'INSERT INTO foo VALUES (54);'"
+  run_in_hadoop_master_container hive -e 'SELECT 1' &&
+  run_in_hadoop_master_container hive -e 'CREATE TABLE foo (a INT);' &&
+  run_in_hadoop_master_container hive -e 'INSERT INTO foo VALUES (54);' &&
   # SELECT with WHERE to make sure that map-reduce job is scheduled
-  run_in_hadoop_master_container su hdfs -c "hive -e 'SELECT a FROM foo WHERE a > 0;'"
+  run_in_hadoop_master_container hive -e 'SELECT a FROM foo WHERE a > 0;' &&
+  true
+}
+
+function run_hive_transactional_tests() {
+    run_in_hadoop_master_container hive -e "
+      CREATE TABLE transactional_table (x int) STORED AS orc TBLPROPERTIES ('transactional'='true');
+      INSERT INTO transactional_table VALUES (1), (2), (3), (4);
+    " &&
+    run_in_hadoop_master_container hive -e 'SELECT x FROM transactional_table WHERE x > 0;' &&
+    run_in_hadoop_master_container hive -e 'DELETE FROM transactional_table WHERE x = 2;' &&
+    run_in_hadoop_master_container hive -e 'UPDATE transactional_table SET x = 14 WHERE x = 4;' &&
+    run_in_hadoop_master_container hive -e 'SELECT x FROM transactional_table WHERE x > 0;' &&
+    true
 }
 
 function stop_all_containers() {
@@ -111,7 +124,7 @@ stop_all_containers
 # catch terminate signals
 trap terminate INT TERM EXIT
 
-environment_compose up -d 
+environment_compose up -d
 
 # start docker logs for the external services
 environment_compose logs --no-color -f &
@@ -125,6 +138,9 @@ retry check_hadoop
 set +e
 sleep 10
 run_tests
+if [[ ${ENVIRONMENT} == *"3.1-hive" ]]; then
+      run_hive_transactional_tests
+fi
 EXIT_CODE=$?
 set -e
 
