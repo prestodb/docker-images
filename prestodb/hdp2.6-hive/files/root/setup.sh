@@ -51,3 +51,7 @@ killall mysqld
 sleep 10s
 mkdir /var/log/mysql/
 chown mysql:mysql /var/log/mysql/
+
+# 8 download Alibaba Cloud OSS related jar files
+curl -o /usr/hdp/2.6.3.0-235/hadoop/lib/hadoop-aliyun-2.7.2.jar https://oss.sonatype.org/service/local/repositories/comaliyun-9606/content/com/aliyun/oss/hadoop-aliyun/2.7.2/hadoop-aliyun-2.7.2.jar
+
