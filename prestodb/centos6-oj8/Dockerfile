@@ -59,4 +59,13 @@ RUN \
     # cleanup
     yum -y clean all && rm -rf /tmp/* /var/tmp/*
 
+# Add an optional OpenJDK Java 17 for Presto JDK upgrade migration
+# Launcher script(s) should search for the existence of this path and use these as needed
+RUN mkdir /opt/java
+WORKDIR /opt/java
+RUN mkdir openjdk17
+RUN curl -L https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.13%2B11/OpenJDK17U-jdk_x64_linux_hotspot_17.0.13_11.tar.gz -o openjdk17.tar.gz && \
+    tar xf openjdk17.tar.gz --strip-components=1 -C ./openjdk17 && \
+    rm openjdk17.tar.gz
+
 ENV JAVA_HOME $JDK_PATH
