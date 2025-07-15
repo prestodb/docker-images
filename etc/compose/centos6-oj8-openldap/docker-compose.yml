@@ -1,0 +1,5 @@
+version: '2.0'
+services:
+  presto-ldap:
+    hostname: presto-ldap
+    image: prestodb/centos6-oj8-openldap:latest

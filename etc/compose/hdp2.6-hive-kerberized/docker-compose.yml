@@ -1,0 +1,5 @@
+services:
+  hadoop-master:
+    hostname: hadoop-master
+    image: prestodb/hdp2.6-hive-kerberized:latest
+
