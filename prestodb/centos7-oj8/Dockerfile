@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM library/centos:7
-MAINTAINER Presto community <https://prestodb.io/community.html>
+FROM azul/zulu-openjdk-centos:11
+LABEL maintainer="Presto community <https://prestodb.io/community.html>"
 
-COPY ./files /
+COPY ./files /tmp/files
 
 # Install Java and presto-admin dependences
 RUN \
@@ -24,13 +24,10 @@ RUN \
         wget \
         && \
     \
-    # install Zulu JDK (will not be the default `java`)
-    rpm -i https://cdn.azul.com/zulu/bin/zulu11.39.15-ca-jdk11.0.7-linux.x86_64.rpm && \
-    \
     # install supervisor
     yum --enablerepo=extras install -y setuptools epel-release && \
     yum install -y python-pip && \
-    pip install supervisor && \
+    pip install --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host files.pythonhosted.org supervisor && \
     \
     # install commonly needed packages
     yum install -y \
@@ -40,9 +37,17 @@ RUN \
         telnet `# helpful when troubleshooting product tests` \
         vim `# helpful when troubleshooting product tests` \
         && \
+    \
+    # copy configuration files
+    cp -a /tmp/files/opt/* /opt/ && \
+    cp -a /tmp/files/usr/* /usr/ && \
+    \
+    # fix permissions
+    mkdir -p /root/.ssh && chown -R root:root /root && chmod 0700 /root/.ssh /root && \
+    \
     # cleanup
-    yum -y clean all && rm -rf /tmp/* /var/tmp/*
+    yum -q clean all && rm -rf /var/cache/yum && rm -rf /tmp/* /var/tmp/*
 
-ENV PATH="/usr/local/bin:${PATH}"
-ENV JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
-ENV LANG=en_US.UTF-8
+ENV PATH="/usr/local/bin:${PATH}" \
+    JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk \
+    LANG=en_US.UTF-8
