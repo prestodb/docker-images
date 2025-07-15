@@ -18,4 +18,5 @@ docker history --no-trunc --format "{{.ID}}\t{{.CreatedBy}}" "$1" | awk '
 			print $1
 		}
 		exit ec
-	}'
+	}' || echo "$1"
+

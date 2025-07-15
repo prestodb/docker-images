@@ -18,7 +18,11 @@ find_args() {
 
 		$1 == "ARG" {
 			key = $2;
-			print "DBFLAGS_" image " += --build-arg " key "=$(" key ")";
+			if (index(key, "=") > 0) {
+				print "DBFLAGS_" image " += --build-arg " key;
+			} else {
+				print "DBFLAGS_" image " += --build-arg " key "=$(" key ")";
+			}
 		}' "$1"
 }
 

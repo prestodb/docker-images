@@ -21,7 +21,7 @@ function retry() {
 }
 
 function environment_compose() {
-  docker-compose -f "${DOCKER_CONF_LOCATION}/${ENVIRONMENT}/docker-compose.yml" "$@"
+  docker compose -f "${DOCKER_CONF_LOCATION}/${ENVIRONMENT}/docker-compose.yml" "$@"
 }
 
 function run_in_hadoop_master_container() {
@@ -116,7 +116,7 @@ fi
 shift 1
 
 # check docker and docker compose installation
-docker-compose version
+docker compose version
 docker version
 
 stop_all_containers
