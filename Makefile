@@ -25,6 +25,7 @@ BUILDDIR=build
 DEPDIR=$(BUILDDIR)/depends
 FLAGDIR=$(BUILDDIR)/flags
 ORGDIR=prestodb
+FORCE_PULL?=false
 
 #
 # This should be the only place you need to touch to update the version of Java
@@ -54,6 +55,7 @@ IMAGE_DIRS := $(shell find $(ORGDIR) -type f -name Dockerfile -exec dirname {} \
 UNLABELLED_TAGS := $(addsuffix @unlabelled,$(IMAGE_DIRS))
 PARENT_CHECKS := $(addsuffix -parent-check,$(IMAGE_DIRS))
 LATEST_TAGS := $(addsuffix @latest,$(IMAGE_DIRS))
+LOCAL_TAGS := $(addsuffix @local,$(IMAGE_DIRS))
 VERSION_TAGS := $(addsuffix @$(VERSION),$(IMAGE_DIRS))
 GIT_HASH := $(shell git rev-parse --short HEAD)
 GIT_HASH_TAGS := $(addsuffix @$(GIT_HASH),$(IMAGE_DIRS))
@@ -63,6 +65,8 @@ FLAGS := $(foreach dockerfile,$(DOCKERFILES),$(FLAGDIR)/$(dockerfile:/Dockerfile
 
 RELEASE_TAGS := $(VERSION_TAGS) $(GIT_HASH_TAGS) $(LATEST_TAGS)
 SNAPSHOT_TAGS := $(GIT_HASH_TAGS)
+
+BUILD_ARGS_prestodb/hdp3.1-hive := --add-host="hadoop-master:127.0.0.1"
 
 #
 # Make a list of the Docker images we depend on, but aren't built from
@@ -190,7 +194,7 @@ $(LATEST_TAGS): %@latest: %/Dockerfile %-parent-check
 	@echo
 	@echo "Building [$@] image"
 	@echo
-	cd $* && time $(SHELL) -c "( tar -czh . | docker build ${BUILD_ARGS} $(DBFLAGS_$*) -t $(call docker-tag,$@) --label $(LABEL) - )"
+	cd $* && time $(SHELL) -c "( tar -czh . | docker build ${BUILD_ARGS} ${BUILD_ARGS_$*} $(DBFLAGS_$*) -t $(call docker-tag,$@) --label $(LABEL) - )"
 	docker history $(call docker-tag,$@)
 
 $(VERSION_TAGS): %@$(VERSION): %@latest
@@ -218,8 +222,18 @@ $(IMAGE_DIRS): %: %@latest
 # this repository.
 #
 $(EXTERNAL_DEPS): %:
-	docker pull $(call docker-tag,$@)
+	if [ "$(FORCE_PULL)" = "true" ]; then \
+		docker pull $(call docker-tag,$@); \
+	elif ! docker image inspect $(call docker-tag,$@) >/dev/null 2>&1; then \
+		docker pull $(call docker-tag,$@); \
+	fi
 
+$(LOCAL_TAGS): %@local: %/Dockerfile %-parent-check
+	@echo
+	@echo "Building [$@] image locally"
+	@echo
+	cd $* && time $(SHELL) -c "( tar -czh . | docker build ${BUILD_ARGS} ${BUILD_ARGS_$*} $(DBFLAGS_$*) -t $(call docker-tag,$@) --label $(LABEL) - )"
+	docker tag $(call docker-tag,$@) $(shell $(SHELL) $(LABEL_PARENT_SH) $*:latest)
 #
 # Targets and variables for creating the dependency graph of the docker images
 # as an image file.

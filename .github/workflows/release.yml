@@ -1,0 +1,163 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'new_version'
+        type: 'choice'
+        options:
+          - new_version
+          - from_version
+      version:
+        description: 'Version to release(e.g. 12)'
+        required: false
+        type: 'string'
+      images:
+        description: 'Comma-separated list of images to release (e.g. "centos7-oj8,hdp3.1-hive")'
+        required: true
+        type: 'string'
+      tag_latest:
+        description: 'Tag the published images as latest'
+        type: boolean
+        default: true
+        required: false
+
+env:
+  GIT_CI_USER: ${{ vars.GIT_CI_USER || 'prestodb-ci' }}
+  GIT_CI_EMAIL: ${{ vars.GIT_CI_EMAIL || 'ci@lists.prestodb.io' }}
+
+jobs:
+  release-branch:
+    name: Prepare release branch
+    if: ${{ github.event.inputs.release_type == 'new_version' }}
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    outputs:
+      release_version: ${{ steps.release_tag.outputs.release_version }}
+    steps:
+      - name: Check for master branch
+        if: ${{ github.ref != 'refs/heads/master' }}
+        run: echo "Invalid branch. New release can only be run on the master branch." && exit 1
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PRESTODB_CI_TOKEN }}
+          show-progress: false
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "${{ env.GIT_CI_EMAIL }}"
+          git config --global user.name "${{ env.GIT_CI_USER }}"
+          git config --global alias.ls 'log --pretty=format:"%cd %h %ce: %s" --date=short --no-merges'
+          git ls -5
+
+      - name: Create release tag
+        id: release_tag
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          CURRENT_VERSION=$(grep "VERSION :=" Makefile | sed 's/VERSION := //' | sed 's/-SNAPSHOT//')
+          NEW_VERSION=${{ github.event.inputs.version }}
+
+          if [ -z "$NEW_VERSION" ]; then
+            NEW_VERSION=${CURRENT_VERSION}
+          fi
+
+          sed -i "s/VERSION := .*/VERSION := ${NEW_VERSION}/" Makefile
+          echo "release_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          git add Makefile
+          git commit -m "[release-action] release version ${NEW_VERSION}"
+          git ls -5
+          git tag -a -m "Release version ${NEW_VERSION}" ${NEW_VERSION}
+
+      - name: Prepare next snapshot version
+        run: |
+          sed -i "s/VERSION := .*/VERSION := $((NEW_VERSION + 1))-SNAPSHOT/" Makefile
+          git add Makefile
+          git commit -m "[release-action] prepare for next development iteration"
+          git ls -5
+          git push origin master --tags
+
+  publish-images:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: write
+    needs: [release-branch]
+    if: (!failure() && !cancelled())
+    steps:
+      - name: Validate inputs
+        run: |
+          if [ -z "${{ github.event.inputs.images }}" ]; then
+            echo "Error: Image names are required."
+            exit 1
+          fi
+          if [ "${{ github.event.inputs.release_type }}" != "new_version" ]; then
+            if [ -z "${{ github.event.inputs.version }}" ]; then
+              echo "Error: Version is required for from_version release type."
+              exit 1
+            fi
+          fi
+
+      - name: Get checkout branch
+        run: |
+          echo "Get checking out branch"
+          if [ "${{ github.event.inputs.release_type }}" = "new_version" ]; then
+            echo "RELEASE_VERSION=${{ needs.release-branch.outputs.release_version }}" >> $GITHUB_ENV
+          else
+            echo "RELEASE_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          fi
+          echo "RELEASE_VERSION=${{ env.RELEASE_VERSION }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          show-progress: false
+          ref: refs/tags/${{ env.RELEASE_VERSION }}
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "${{ env.GIT_CI_EMAIL }}"
+          git config --global user.name "${{ env.GIT_CI_USER }}"
+          git config --global alias.ls 'log --pretty=format:"%cd %h %ce: %s" --date=short --no-merges'
+          git ls -5
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Release Selected Images
+        env:
+          RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+        run: |
+          IMAGES="${{ github.event.inputs.images }}"
+
+          IFS=',' read -ra IMAGE_ARRAY <<< "$IMAGES"
+
+          for IMAGE in "${IMAGE_ARRAY[@]}"; do
+            echo "Building image: $IMAGE"
+            if [ "$IMAGE" = "centos7-oj8" ]; then
+              make "prestodb/$IMAGE@local"
+            else
+              make "prestodb/$IMAGE"
+            fi
+            docker images
+          done
+
+          for IMAGE in "${IMAGE_ARRAY[@]}"; do
+            echo "Publishing image: $IMAGE"
+            docker tag "prestodb/$IMAGE:latest" "${{ github.repository_owner }}/$IMAGE:$RELEASE_VERSION"
+            docker push "${{ github.repository_owner }}/$IMAGE:$RELEASE_VERSION"
+
+            if [ "${{ github.event.inputs.tag_latest }}" = "true" ]; then
+              docker tag "prestodb/$IMAGE:latest" "${{ github.repository_owner }}/$IMAGE:latest"
+              docker push "${{ github.repository_owner }}/$IMAGE:latest"
+            fi
+          done
