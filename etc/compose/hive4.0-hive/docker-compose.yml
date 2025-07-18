@@ -1,0 +1,5 @@
+services:
+  hadoop-master:
+    hostname: hadoop-master
+    image: prestodb/hive4.0-hive:latest
+
