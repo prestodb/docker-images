@@ -33,8 +33,8 @@ FORCE_PULL?=false
 # indirectly from this one, and you should pass those variables to the
 # Dockerfiles using ARG and --build-arg.
 #
-JDK_URL := http://download.oracle.com/otn-pub/java/jdk/8u181-b13/96a7b8442fe848ef90c96a2fad6ed6d1/jdk-8u181-linux-x64.rpm
-JDK_PATH := /usr/java/jdk1.8.0_181-amd64
+JDK_URL := https://cdn.azul.com/zulu/bin/zulu8.52.0.23-ca-jdk8.0.282-linux_x64.tar.gz
+JDK_PATH := /usr/java/zulu8.52.0.23-ca-jdk8.0.282-linux_x64
 JDK_PATH_BUILD_ARGS := \
 	--build-arg JDK_PATH=$(JDK_PATH)
 

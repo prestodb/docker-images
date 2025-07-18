@@ -16,36 +16,21 @@ MAINTAINER Presto community <https://prestodb.io/community.html>
 ARG JDK_URL
 ARG JDK_PATH
 
+COPY CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+
 # Install Oracle Java and presto-admin dependences (already has python 2.6)
 RUN \
     set -xeu && \
     yum install -y wget && \
     # install and trim Oracle JDK
-    wget -nv --header "Cookie: oraclelicense=accept-securebackup-cookie" $JDK_URL -O jdk.rpm && \
-    rpm -ivh jdk.rpm && rm jdk.rpm && \
-    rm -r $JDK_PATH/*src.zip \
-           $JDK_PATH/lib/missioncontrol \
-           $JDK_PATH/lib/visualvm \
-           $JDK_PATH/lib/*javafx* \
-           $JDK_PATH/jre/lib/plugin.jar \
-           $JDK_PATH/jre/lib/ext/jfxrt.jar \
-           $JDK_PATH/jre/bin/javaws \
-           $JDK_PATH/jre/lib/javaws.jar \
-           $JDK_PATH/jre/lib/desktop \
-           $JDK_PATH/jre/plugin \
-           $JDK_PATH/jre/lib/deploy* \
-           $JDK_PATH/jre/lib/*javafx* \
-           $JDK_PATH/jre/lib/*jfx* \
-           $JDK_PATH/jre/lib/amd64/libdecora_sse.so \
-           $JDK_PATH/jre/lib/amd64/libprism_*.so \
-           $JDK_PATH/jre/lib/amd64/libfxplugins.so \
-           $JDK_PATH/jre/lib/amd64/libglass.so \
-           $JDK_PATH/jre/lib/amd64/libgstreamer-lite.so \
-           $JDK_PATH/jre/lib/amd64/libjavafx*.so \
-           $JDK_PATH/jre/lib/amd64/libjfx*.so && \
-    \
+    wget -nv $JDK_URL -O jdk.tgz && \
+    mkdir -p $JDK_PATH && \
+    tar xvfz jdk.tgz -C $JDK_PATH --strip-components=1 && \
+    $JDK_PATH/bin/java -version && \
     # make java fixed (so further layers don't accidentally override it)
-    update-alternatives --set java $JDK_PATH/jre/bin/java && \
+    update-alternatives --help && \
+    alternatives --help && \
+    update-alternatives --install /usr/local/bin/java java $JDK_PATH/jre/bin/java 0 && \
     \
     # install supervisor
     yum install -y setuptools epel-release && \
