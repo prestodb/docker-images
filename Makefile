@@ -25,6 +25,7 @@ BUILDDIR=build
 DEPDIR=$(BUILDDIR)/depends
 FLAGDIR=$(BUILDDIR)/flags
 ORGDIR=prestodb
+DOCKER_ORG?=prestodb
 FORCE_PULL?=false
 
 #
@@ -56,6 +57,7 @@ UNLABELLED_TAGS := $(addsuffix @unlabelled,$(IMAGE_DIRS))
 PARENT_CHECKS := $(addsuffix -parent-check,$(IMAGE_DIRS))
 LATEST_TAGS := $(addsuffix @latest,$(IMAGE_DIRS))
 LOCAL_TAGS := $(addsuffix @local,$(IMAGE_DIRS))
+MULTI_TAGS := $(addsuffix @multi,$(IMAGE_DIRS))
 VERSION_TAGS := $(addsuffix @$(VERSION),$(IMAGE_DIRS))
 GIT_HASH := $(shell git rev-parse --short HEAD)
 GIT_HASH_TAGS := $(addsuffix @$(GIT_HASH),$(IMAGE_DIRS))
@@ -95,7 +97,7 @@ docker-tag = $(subst @,:,$(1))
 # continues to build them if a file with a matching name somehow comes into
 # existence
 #
-.PHONY: $(IMAGE_DIRS) $(LATEST_TAGS) $(UNLABELLED_TAGS) $(VERSION_TAGS) $(GIT_HASH_TAGS)
+.PHONY: $(IMAGE_DIRS) $(LATEST_TAGS) $(UNLABELLED_TAGS) $(VERSION_TAGS) $(GIT_HASH_TAGS) $(MULTI_TAGS)
 .PHONY: $(PARENT_CHECKS) $(IMAGE_TESTS) $(EXTERNAL_DEPS)
 
 # By default, build all of the images.
@@ -234,6 +236,26 @@ $(LOCAL_TAGS): %@local: %/Dockerfile %-parent-check
 	@echo
 	cd $* && time $(SHELL) -c "( tar -czh . | docker build ${BUILD_ARGS} ${BUILD_ARGS_$*} $(DBFLAGS_$*) -t $(call docker-tag,$@) --label $(LABEL) - )"
 	docker tag $(call docker-tag,$@) $(shell $(SHELL) $(LABEL_PARENT_SH) $*:latest)
+
+#
+# Multi-arch build target using buildx
+# This builds and pushes multi-architecture images directly to the registry
+# Supports linux/amd64 and linux/arm64 platforms
+#
+$(MULTI_TAGS): %@multi: %/Dockerfile %-parent-check
+	@echo
+	@echo "Building multi-arch [$@] image and pushing to $(DOCKER_ORG)"
+	@echo
+	docker buildx create --use --name multiarch-builder --driver docker-container || docker buildx use multiarch-builder
+	cd $* && docker buildx build \
+		${BUILD_ARGS} ${BUILD_ARGS_$*} $(DBFLAGS_$*) \
+		--platform linux/amd64,linux/arm64 \
+		--label $(LABEL) \
+		-t $(DOCKER_ORG)/$(notdir $*):latest \
+		-t $(DOCKER_ORG)/$(notdir $*):$(VERSION) \
+		--push \
+		.
+	@echo "Multi-arch image pushed to $(DOCKER_ORG)/$(notdir $*)"
 #
 # Targets and variables for creating the dependency graph of the docker images
 # as an image file.
@@ -260,7 +282,7 @@ $(GVFRAGS): $(GVDIR)/%.gv.frag: %/Dockerfile $(DEPEND_SH)
 	$(SHELL) $(DEPEND_SH) -g $< $(call docker-tag,$(UNLABELLED_TAGS)) >$@
 
 .PHONY: test
-test: 
+test:
 	$(TEST_SH) $(IMAGE_TO_TEST)
 
 .PHONY: clean

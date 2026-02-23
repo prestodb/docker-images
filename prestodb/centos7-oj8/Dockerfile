@@ -10,7 +10,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM azul/zulu-openjdk-centos:11
+FROM azul/zulu-openjdk-centos:17
 LABEL maintainer="Presto community <https://prestodb.io/community.html>"
 
 COPY ./files /tmp/files
@@ -28,6 +28,8 @@ RUN \
     yum --enablerepo=extras install -y setuptools epel-release && \
     yum install -y python-pip && \
     pip install --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host files.pythonhosted.org supervisor && \
+    # install python 3
+    yum install -y python3 python3-pip && \
     \
     # install commonly needed packages
     yum install -y \
