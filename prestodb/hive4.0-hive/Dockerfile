@@ -43,7 +43,7 @@ RUN yum install -y \
         curl -o /tmp/hadoop.tar.gz --url $HADOOP_BINARY_PATH && \
         tar xzf /tmp/hadoop.tar.gz --directory /opt && mv /opt/hadoop-${HADOOP_VERSION} /opt/hadoop && \
     # install hive
-    HIVE_BINARY_PATH=https://dlcdn.apache.org/hive/hive-$HIVE_VERSION/apache-hive-$HIVE_VERSION-bin.tar.gz && \
+    HIVE_BINARY_PATH=https://archive.apache.org/dist/hive/hive-$HIVE_VERSION/apache-hive-$HIVE_VERSION-bin.tar.gz && \
         curl -o /tmp/hive.tar.gz --url $HIVE_BINARY_PATH && \
         tar xzf /tmp/hive.tar.gz --directory /opt && mv /opt/apache-hive-${HIVE_VERSION}-bin /opt/hive && \
     # install mysql connector and aws s3 sdk

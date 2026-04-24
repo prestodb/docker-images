@@ -26,13 +26,12 @@ ARG HADOOP_VERSION=3.1.2
 ARG HIVE_VERSION=3.1.2
 
 # TODO Apache Archive is rate limited -- these should probably go in S3
-ARG HADOOP_BINARY_PATH=https://archive.apache.org/dist/hadoop/common/hadoop-$HADOOP_VERSION/hadoop-$HADOOP_VERSION.tar.gz
-ARG HIVE_BINARY_PATH=https://apache.mivzakim.net/hive/hive-$HIVE_VERSION/apache-hive-$HIVE_VERSION-bin.tar.gz
-
-RUN curl -o /tmp/hadoop.tar.gz --url $HADOOP_BINARY_PATH && \
+RUN HADOOP_BINARY_PATH=https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz && \
+    curl -o /tmp/hadoop.tar.gz --url $HADOOP_BINARY_PATH && \
     tar xzf /tmp/hadoop.tar.gz --directory /opt && mv /opt/hadoop-$HADOOP_VERSION /opt/hadoop
 
-RUN curl -o /tmp/hive.tar.gz --url $HIVE_BINARY_PATH && \
+RUN HIVE_BINARY_PATH=https://archive.apache.org/dist/hive/hive-${HIVE_VERSION}/apache-hive-${HIVE_VERSION}-bin.tar.gz && \
+    curl -o /tmp/hive.tar.gz --url $HIVE_BINARY_PATH && \
     tar xzf /tmp/hive.tar.gz --directory /opt && mv /opt/apache-hive-${HIVE_VERSION}-bin /opt/hive
 
 ARG MYSQL_CONNECTOR_VERSION=8.0.13
