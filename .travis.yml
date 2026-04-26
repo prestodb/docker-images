@@ -24,12 +24,8 @@ install: make ${IMAGE_TO_BUILD}
 script: make test IMAGE_TO_TEST=${IMAGE_TO_TEST}
 
 before_deploy:
-  # decrypt the github deploy key
-  - openssl aes-256-cbc -K $encrypted_cd2beb64619c_key -iv $encrypted_cd2beb64619c_iv
-    -in .travis/github_tags_push_deploy_key.enc -out .travis/github_tags_push_deploy_key -d
-  - chmod 600 .travis/github_tags_push_deploy_key
-  - eval "$(ssh-agent -s)"
-  - ssh-add .travis/github_tags_push_deploy_key
+  - git config --global user.email "presto-oss@users.noreply.github.com" && git config --global user.name "Presto Bot"
+  - echo "machine github.com login presto-oss password ${PRESTOOSS_PAT} > ~/.netrc
   - docker login --username=${DOCKERHUB_LOGIN} --password=${DOCKERHUB_PASSWORD}
 
 # Publish snapshots to Dockerhub for commits tagged `latest-snapshot-*`
